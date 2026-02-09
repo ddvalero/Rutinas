@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutinas Diarias - Planificador Semanal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .day-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            flex-wrap: wrap;
+        }
+        
+        .day-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .day-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .day-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .day-content {
+            display: none;
+        }
+        
+        .day-content.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            padding: 20px;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .morning { background: linear-gradient(135deg, #FDB99B 0%, #F2726F 100%); }
+        .afternoon { background: linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%); }
+        .evening { background: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%); }
+        .night { background: linear-gradient(135deg, #4E54C8 0%, #8F94FB 100%); }
+        
+        .section-content {
+            background: white;
+            padding: 20px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .checklist-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .checklist-item.checked {
+            background: #d4edda;
+            opacity: 0.7;
+        }
+        
+        .checkbox {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .checkbox:hover {
+            transform: scale(1.1);
+            border-color: #764ba2;
+        }
+        
+        .checkbox.checked {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .item-text {
+            flex: 1;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        
+        .time-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .sub-checklist {
+            margin-left: 45px;
+            margin-top: 10px;
+        }
+        
+        .sub-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            font-size: 0.95em;
+        }
+        
+        .sub-checkbox {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .sub-checkbox.checked {
+            background: #667eea;
+        }
+        
+        .sub-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .alert-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+        
+        .alert-box strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .schedule-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.3s;
+        }
+        
+        .schedule-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .schedule-time {
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .schedule-activity {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reset-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(220, 53, 69, 0.5);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .day-selector, .reset-btn {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Mi Planificador de Rutinas</h1>
+            <p>Organiza tu semana día a día</p>
+        </div>
+        
+        <div class="day-selector">
+            <button class="day-btn active" onclick="showDay('lunes')">Lunes</button>
+            <button class="day-btn" onclick="showDay('martes')">Martes</button>
+            <button class="day-btn" onclick="showDay('miercoles')">Miércoles</button>
+            <button class="day-btn" onclick="showDay('jueves')">Jueves</button>
+            <button class="day-btn" onclick="showDay('viernes')">Viernes</button>
+        </div>
+        
+        <div class="content">
+            <!-- LUNES -->
+            <div id="lunes" class="day-content active">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-lunes"></div>
+                </div>
+                <div class="progress-text" id="progress-text-lunes">0% completado</div>
+                
+                <div class="section">
+                    <div class="section-header morning">
+                        🌅 RUTINA DE MAÑANA (08:00 - 08:55)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me levanto cuando suena la alarma</div>
+                            <div class="time-badge">08:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Aseo completo (WC, lavar cara y dientes, peinar)</div>
+                            <div class="time-badge">08:00-08:10</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me visto con la ropa preparada</div>
+                            <div class="time-badge">08:10-08:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Desayuno y tomo medicación (Elvanse 50mg)</div>
+                            <div class="time-badge">08:20-08:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Reviso mi mochila</div>
+                            <div class="time-badge">08:30-08:40</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Agenda</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Estuche</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Deberes/libros del día</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Botella de agua</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Abrigo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo y salgo (zapatos, mochila)</div>
+                            <div class="time-badge">08:40-08:55</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizador:</strong> Poner alarma a las 08:50 (5 min para salir)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header afternoon">
+                        ☀️ RUTINA DE TARDE (16:40 - 20:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llegada: dejo mochila en su sitio, baño, agua</div>
+                            <div class="time-badge">16:40-16:50</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Merienda tranquila</div>
+                            <div class="time-badge">16:50-17:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Hago los deberes (temporizador 45 min)</div>
+                            <div class="time-badge">17:15-18:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo para patines (ropa + equipo)</div>
+                            <div class="time-badge">18:00-18:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">🛼 PATINES</div>
+                            <div class="time-badge">18:15-19:45</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llego de patines: guardo equipo, ropa a la cesta</div>
+                            <div class="time-badge">19:45-20:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>18:10 → 5 min para salir a patines</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header night">
+                        🌙 RUTINA DE NOCHE (20:00 - 22:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Ducha completa (champú, jabón, secarme, pijama)</div>
+                            <div class="time-badge">20:00-20:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Cena tranquila</div>
+                            <div class="time-badge">20:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo el día siguiente</div>
+                            <div class="time-badge">20:50-21:10</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ropa del martes en la silla</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Reviso agenda de mañana</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Mochila lista (libros + material)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llamo a los abuelos</div>
+                            <div class="time-badge">21:15-21:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Leo en mi cama (temporizador 30 min)</div>
+                            <div class="time-badge">21:30-22:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="lunes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">💤 Apago la luz y duermo</div>
+                            <div class="time-badge">22:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>20:15 → 5 min para terminar ducha</li>
+                                <li>21:05 → 5 min para terminar preparación</li>
+                                <li>21:25 → 5 min para terminar llamada</li>
+                                <li>21:55 → 5 min para terminar lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MARTES -->
+            <div id="martes" class="day-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-martes"></div>
+                </div>
+                <div class="progress-text" id="progress-text-martes">0% completado</div>
+                
+                <div class="section">
+                    <div class="section-header morning">
+                        🌅 RUTINA DE MAÑANA (08:00 - 08:55)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me levanto cuando suena la alarma</div>
+                            <div class="time-badge">08:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Aseo completo (WC, lavar cara y dientes, peinar)</div>
+                            <div class="time-badge">08:00-08:10</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me visto con la ropa preparada</div>
+                            <div class="time-badge">08:10-08:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Desayuno y tomo medicación (Elvanse 50mg)</div>
+                            <div class="time-badge">08:20-08:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Reviso mi mochila</div>
+                            <div class="time-badge">08:30-08:40</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Agenda</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Estuche</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Deberes/libros del día</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Botella de agua</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Abrigo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo y salgo (zapatos, mochila)</div>
+                            <div class="time-badge">08:40-08:55</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizador:</strong> Poner alarma a las 08:50 (5 min para salir)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header afternoon">
+                        ☀️ RUTINA DE TARDE (16:40 - 20:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llegada: dejo mochila en su sitio, baño, agua</div>
+                            <div class="time-badge">16:40-16:50</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Merienda tranquila</div>
+                            <div class="time-badge">16:50-17:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Deberes - Tramo 1 (temporizador 40 min)</div>
+                            <div class="time-badge">17:15-17:55</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">PAUSA: baño, agua, estiramiento</div>
+                            <div class="time-badge">17:55-18:05</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Deberes - Tramo 2 (temporizador 25 min)</div>
+                            <div class="time-badge">18:05-18:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Actividad estructurada</div>
+                            <div class="time-badge">18:30-19:15</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ordeno mi habitación (15 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ayudo en tarea de casa (15 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Actividad que elijo (15 min)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Tiempo libre (elijo 1 opción)</div>
+                            <div class="time-badge">19:15-19:45</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo ducha (recojo + pijama listo)</div>
+                            <div class="time-badge">19:45-20:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>17:50 → 5 min para pausa</li>
+                                <li>18:25 → 5 min para terminar deberes</li>
+                                <li>19:10 → 5 min para terminar actividad</li>
+                                <li>19:40 → 5 min para preparar ducha</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header night">
+                        🌙 RUTINA DE NOCHE (20:00 - 22:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Ducha completa (champú, jabón, secarme, pijama)</div>
+                            <div class="time-badge">20:00-20:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Cena tranquila</div>
+                            <div class="time-badge">20:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo el día siguiente</div>
+                            <div class="time-badge">20:50-21:10</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ropa del miércoles en la silla</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Reviso agenda de mañana</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Mochila lista + equipo de patines</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llamo a los abuelos</div>
+                            <div class="time-badge">21:15-21:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Leo en mi cama (temporizador 30 min)</div>
+                            <div class="time-badge">21:30-22:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="martes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">💤 Apago la luz y duermo</div>
+                            <div class="time-badge">22:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>20:15 → 5 min para terminar ducha</li>
+                                <li>21:05 → 5 min para terminar preparación</li>
+                                <li>21:25 → 5 min para terminar llamada</li>
+                                <li>21:55 → 5 min para terminar lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MIÉRCOLES -->
+            <div id="miercoles" class="day-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-miercoles"></div>
+                </div>
+                <div class="progress-text" id="progress-text-miercoles">0% completado</div>
+                
+                <div class="section">
+                    <div class="section-header morning">
+                        🌅 RUTINA DE MAÑANA (08:00 - 08:55)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me levanto cuando suena la alarma</div>
+                            <div class="time-badge">08:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Aseo completo (WC, lavar cara y dientes, peinar)</div>
+                            <div class="time-badge">08:00-08:10</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me visto con la ropa preparada</div>
+                            <div class="time-badge">08:10-08:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Desayuno y tomo medicación (Elvanse 50mg)</div>
+                            <div class="time-badge">08:20-08:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Reviso mi mochila</div>
+                            <div class="time-badge">08:30-08:40</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Agenda</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Estuche</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Deberes/libros del día</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Botella de agua</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Abrigo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo y salgo (zapatos, mochila)</div>
+                            <div class="time-badge">08:40-08:55</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizador:</strong> Poner alarma a las 08:50 (5 min para salir)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header afternoon">
+                        ☀️ RUTINA DE TARDE (16:40 - 20:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llegada: dejo mochila en su sitio, baño, agua</div>
+                            <div class="time-badge">16:40-16:50</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Merienda tranquila</div>
+                            <div class="time-badge">16:50-17:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Hago los deberes (temporizador 45 min)</div>
+                            <div class="time-badge">17:15-18:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo para patines (ropa + equipo)</div>
+                            <div class="time-badge">18:00-18:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">🛼 PATINES</div>
+                            <div class="time-badge">18:15-19:45</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llego de patines: guardo equipo, ropa a la cesta</div>
+                            <div class="time-badge">19:45-20:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>18:10 → 5 min para salir a patines</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header night">
+                        🌙 RUTINA DE NOCHE (20:00 - 22:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Ducha completa (champú, jabón, secarme, pijama)</div>
+                            <div class="time-badge">20:00-20:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Cena tranquila</div>
+                            <div class="time-badge">20:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo el día siguiente</div>
+                            <div class="time-badge">20:50-21:10</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ropa del jueves en la silla</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Reviso agenda de mañana</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Mochila lista (libros + material)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llamo a los abuelos</div>
+                            <div class="time-badge">21:15-21:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Leo en mi cama (temporizador 30 min)</div>
+                            <div class="time-badge">21:30-22:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="miercoles">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">💤 Apago la luz y duermo</div>
+                            <div class="time-badge">22:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>20:15 → 5 min para terminar ducha</li>
+                                <li>21:05 → 5 min para terminar preparación</li>
+                                <li>21:25 → 5 min para terminar llamada</li>
+                                <li>21:55 → 5 min para terminar lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- JUEVES -->
+            <div id="jueves" class="day-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-jueves"></div>
+                </div>
+                <div class="progress-text" id="progress-text-jueves">0% completado</div>
+                
+                <div class="section">
+                    <div class="section-header morning">
+                        🌅 RUTINA DE MAÑANA (08:00 - 08:55)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me levanto cuando suena la alarma</div>
+                            <div class="time-badge">08:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Aseo completo (WC, lavar cara y dientes, peinar)</div>
+                            <div class="time-badge">08:00-08:10</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me visto con la ropa preparada</div>
+                            <div class="time-badge">08:10-08:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Desayuno y tomo medicación (Elvanse 50mg)</div>
+                            <div class="time-badge">08:20-08:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Reviso mi mochila</div>
+                            <div class="time-badge">08:30-08:40</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Agenda</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Estuche</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Deberes/libros del día</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Botella de agua</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Abrigo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo y salgo (zapatos, mochila)</div>
+                            <div class="time-badge">08:40-08:55</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizador:</strong> Poner alarma a las 08:50 (5 min para salir)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header afternoon">
+                        ☀️ RUTINA DE TARDE (16:40 - 20:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llegada: dejo mochila en su sitio, baño, agua</div>
+                            <div class="time-badge">16:40-16:50</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Merienda tranquila</div>
+                            <div class="time-badge">16:50-17:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Deberes - Tramo 1 (temporizador 40 min)</div>
+                            <div class="time-badge">17:15-17:55</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">PAUSA: baño, agua, estiramiento</div>
+                            <div class="time-badge">17:55-18:05</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Deberes - Tramo 2 (temporizador 25 min)</div>
+                            <div class="time-badge">18:05-18:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Actividad estructurada</div>
+                            <div class="time-badge">18:30-19:15</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ordeno mi habitación (15 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ayudo en tarea de casa (15 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Actividad que elijo (15 min)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Tiempo libre (elijo 1 opción)</div>
+                            <div class="time-badge">19:15-19:45</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo ducha (recojo + pijama listo)</div>
+                            <div class="time-badge">19:45-20:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>17:50 → 5 min para pausa</li>
+                                <li>18:25 → 5 min para terminar deberes</li>
+                                <li>19:10 → 5 min para terminar actividad</li>
+                                <li>19:40 → 5 min para preparar ducha</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header night">
+                        🌙 RUTINA DE NOCHE (20:00 - 22:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Ducha completa (champú, jabón, secarme, pijama)</div>
+                            <div class="time-badge">20:00-20:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Cena tranquila</div>
+                            <div class="time-badge">20:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo el día siguiente</div>
+                            <div class="time-badge">20:50-21:10</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ropa del viernes en la silla</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Reviso agenda de mañana</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Mochila lista (libros + material)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llamo a los abuelos</div>
+                            <div class="time-badge">21:15-21:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Leo en mi cama (temporizador 30 min)</div>
+                            <div class="time-badge">21:30-22:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="jueves">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">💤 Apago la luz y duermo</div>
+                            <div class="time-badge">22:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>20:15 → 5 min para terminar ducha</li>
+                                <li>21:05 → 5 min para terminar preparación</li>
+                                <li>21:25 → 5 min para terminar llamada</li>
+                                <li>21:55 → 5 min para terminar lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VIERNES -->
+            <div id="viernes" class="day-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-viernes"></div>
+                </div>
+                <div class="progress-text" id="progress-text-viernes">0% completado</div>
+                
+                <div class="section">
+                    <div class="section-header morning">
+                        🌅 RUTINA DE MAÑANA (08:00 - 08:55)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me levanto cuando suena la alarma</div>
+                            <div class="time-badge">08:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Aseo completo (WC, lavar cara y dientes, peinar)</div>
+                            <div class="time-badge">08:00-08:10</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me visto con la ropa preparada</div>
+                            <div class="time-badge">08:10-08:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Desayuno y tomo medicación (Elvanse 50mg)</div>
+                            <div class="time-badge">08:20-08:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Reviso mi mochila</div>
+                            <div class="time-badge">08:30-08:40</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Agenda</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Estuche</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Deberes/libros del día</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Botella de agua</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Abrigo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Me preparo y salgo (zapatos, mochila)</div>
+                            <div class="time-badge">08:40-08:55</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizador:</strong> Poner alarma a las 08:50 (5 min para salir)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header afternoon">
+                        ☀️ RUTINA DE TARDE (16:40 - 20:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llegada: dejo mochila en su sitio, baño, agua</div>
+                            <div class="time-badge">16:40-16:50</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Merienda tranquila</div>
+                            <div class="time-badge">16:50-17:15</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Deberes si hay (temporizador 45 min)</div>
+                            <div class="time-badge">17:15-18:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">🎉 Preparación fin de semana</div>
+                            <div class="time-badge">18:00-19:30</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ordeno mochila y saco ropa sucia (15 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Actividad preferida (45-60 min)</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Preparo cosas del sábado (15 min)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo ducha (recojo + pijama listo)</div>
+                            <div class="time-badge">19:45-20:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>19:25 → 5 min para preparación sábado</li>
+                                <li>19:40 → 5 min para preparar ducha</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header night">
+                        🌙 RUTINA DE NOCHE (20:00 - 22:00)
+                    </div>
+                    <div class="section-content">
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Ducha completa (champú, jabón, secarme, pijama)</div>
+                            <div class="time-badge">20:00-20:20</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Cena tranquila</div>
+                            <div class="time-badge">20:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Preparo el fin de semana</div>
+                            <div class="time-badge">20:50-21:10</div>
+                        </div>
+                        <div class="sub-checklist">
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Ropa del sábado en la silla</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Reviso planes del fin de semana</span>
+                            </div>
+                            <div class="sub-item">
+                                <div class="sub-checkbox" onclick="toggleCheck(this)"></div>
+                                <span>✓ Preparo cosas necesarias</span>
+                            </div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Llamo a los abuelos</div>
+                            <div class="time-badge">21:15-21:30</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">Leo en mi cama (temporizador 30 min)</div>
+                            <div class="time-badge">21:30-22:00</div>
+                        </div>
+                        
+                        <div class="checklist-item" data-day="viernes">
+                            <div class="checkbox" onclick="toggleCheck(this)"></div>
+                            <div class="item-text">💤 Apago la luz y duermo</div>
+                            <div class="time-badge">22:00</div>
+                        </div>
+                        
+                        <div class="alert-box">
+                            <strong>⏰ Temporizadores:</strong>
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li>20:15 → 5 min para terminar ducha</li>
+                                <li>21:05 → 5 min para terminar preparación</li>
+                                <li>21:25 → 5 min para terminar llamada</li>
+                                <li>21:55 → 5 min para terminar lectura</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="reset-btn" onclick="resetDay()">🔄 Reiniciar día actual</button>
+    
+    <script>
+        let currentDay = 'lunes';
+        
+        // Cargar estado guardado al iniciar
+        window.addEventListener('load', function() {
+            loadAllStates();
+            updateAllProgress();
+        });
+        
+        function showDay(day) {
+            // Ocultar todos los días
+            const allDays = document.querySelectorAll('.day-content');
+            allDays.forEach(d => d.classList.remove('active'));
+            
+            // Mostrar el día seleccionado
+            document.getElementById(day).classList.add('active');
+            
+            // Actualizar botones
+            const allButtons = document.querySelectorAll('.day-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            currentDay = day;
+            updateProgress(day);
+        }
+        
+        function toggleCheck(element) {
+            element.classList.toggle('checked');
+            const item = element.closest('.checklist-item');
+            if (item) {
+                item.classList.toggle('checked');
+                const day = item.getAttribute('data-day');
+                saveState(day);
+                updateProgress(day);
+            } else {
+                // Es un sub-checkbox
+                const dayContent = element.closest('.day-content');
+                const day = dayContent.id;
+                saveState(day);
+                updateProgress(day);
+            }
+        }
+        
+        function updateProgress(day) {
+            const dayContent = document.getElementById(day);
+            const allCheckboxes = dayContent.querySelectorAll('.checkbox, .sub-checkbox');
+            const checkedBoxes = dayContent.querySelectorAll('.checkbox.checked, .sub-checkbox.checked');
+            
+            const total = allCheckboxes.length;
+            const checked = checkedBoxes.length;
+            const percentage = Math.round((checked / total) * 100);
+            
+            const progressBar = document.getElementById('progress-' + day);
+            const progressText = document.getElementById('progress-text-' + day);
+            
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = percentage + '% completado (' + checked + '/' + total + ' tareas)';
+        }
+        
+        function updateAllProgress() {
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+            days.forEach(day => updateProgress(day));
+        }
+        
+        function resetDay() {
+            const day = currentDay;
+            const dayContent = document.getElementById(day);
+            const allCheckboxes = dayContent.querySelectorAll('.checkbox, .sub-checkbox');
+            const allItems = dayContent.querySelectorAll('.checklist-item');
+            
+            allCheckboxes.forEach(box => box.classList.remove('checked'));
+            allItems.forEach(item => item.classList.remove('checked'));
+            
+            saveState(day);
+            updateProgress(day);
+        }
+        
+        function saveState(day) {
+            const dayContent = document.getElementById(day);
+            const checkboxes = dayContent.querySelectorAll('.checkbox, .sub-checkbox');
+            const state = [];
+            
+            checkboxes.forEach((box, index) => {
+                state.push(box.classList.contains('checked'));
+            });
+            
+            localStorage.setItem('routine-' + day, JSON.stringify(state));
+        }
+        
+        function loadState(day) {
+            const saved = localStorage.getItem('routine-' + day);
+            if (!saved) return;
+            
+            const state = JSON.parse(saved);
+            const dayContent = document.getElementById(day);
+            const checkboxes = dayContent.querySelectorAll('.checkbox, .sub-checkbox');
+            
+            checkboxes.forEach((box, index) => {
+                if (state[index]) {
+                    box.classList.add('checked');
+                    const item = box.closest('.checklist-item');
+                    if (item) {
+                        item.classList.add('checked');
+                    }
+                }
+            });
+        }
+        
+        function loadAllStates() {
+            const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+            days.forEach(day => loadState(day));
+        }
+    </script>
+</body>
+</html>
+
